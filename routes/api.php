@@ -1,6 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\GigController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +17,32 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Public routes
+Route::post('register', [AuthenticationController::class, 'register']);
+Route::post('login', [AuthenticationController::class, 'login']);
+
+// Protected routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    // User
+    Route::get('users/me', [UserController::class, 'getProfile']);
+    Route::put('users/me', [UserController::class, 'updateProfile']);
+
+    // Companies
+    Route::resource(
+        'companies',
+        CompanyController::class,
+        ['only' => ['index', 'store', 'show', 'update', 'destroy']]
+    );
+
+    // Gigs
+    Route::get('gigs/search', [GigController::class, 'search']);
+
+    Route::resource(
+        'gigs',
+        GigController::class,
+        ['only' => ['index', 'store', 'show', 'update', 'destroy']]
+    );
+
+    // Logout
+    Route::post('logout', [AuthenticationController::class, 'logout']);
 });
